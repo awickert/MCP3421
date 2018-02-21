@@ -1,10 +1,10 @@
 /******************************************************************************
-MCP3425.cpp
-Library for MCP3425 ADC
+MCP3421.cpp
+Library for MCP3421 ADC
 Bobby Schulz @ Northern Widget LLC & UMN
 2/20/2018
 
-MCP3425 is a 18 bit ADC, PGA, and various modes of resolution operation in order to facilitate various data rates
+MCP3421 is a 18 bit ADC, PGA, and various modes of resolution operation in order to facilitate various data rates
 
 "Simplicity is prerquisite for reliability"
 -Edsger W. Dijkstra
@@ -13,24 +13,24 @@ Distributed as-is; no warranty is given.
 ******************************************************************************/
 
 #include <Arduino.h>
-#include <MCP3425.h>
+#include <MCP3421.h>
 #include <Wire.h>
 
 
-MCP3425::MCP3425(int _ADR)
+MCP3421::MCP3421(int _ADR)
 {
   ADR = _ADR; 
   Wire.begin();  
 }
 
-MCP3425::MCP3425(void)  
+MCP3421::MCP3421(void)  
 {
   ADR = 0x6A; //Use 0x6A as Address by default  
   Wire.begin();  
 }
 
 
-int MCP3425::Begin(void) //Initialize the system in 1x gain, with 12 bit resolution, continuious conversions
+int MCP3421::Begin(void) //Initialize the system in 1x gain, with 12 bit resolution, continuious conversions
 {
   SetGain(1);
   SetResolution(12);
@@ -38,7 +38,7 @@ int MCP3425::Begin(void) //Initialize the system in 1x gain, with 12 bit resolut
 }
 
 //Returns the bit value from the conversion, from 0 to 2^n
-long MCP3425::GetVoltageRaw() {
+long MCP3421::GetVoltageRaw() {
   int Data[4];
   
   int Config = GetConfig(); //Get config register to test if single shot or continuios operation is being used
@@ -87,7 +87,7 @@ long MCP3425::GetVoltageRaw() {
 }
 
 //Returns float voltage value in volts
-float MCP3425::GetVoltage() {
+float MCP3421::GetVoltage() {
   long Raw = GetVoltageRaw(); //Get the raw bits
   int Config = GetConfig(); //Get configuration register 
 
@@ -100,7 +100,7 @@ float MCP3425::GetVoltage() {
 //Sets the gain of the internal PGA, with either 1x, 2x, 4x, or 8x
 //Takes as input the desired gain factor 
 //Returns result of I2C comunication if gain value is valid, or returns -1 if gain value is not valid
-int MCP3425::SetGain(int DesiredGain) {
+int MCP3421::SetGain(int DesiredGain) {
   boolean ValidGain = false;
   for(int i = 0; i < 4; i++){ //Test if gain value is valid
     if(round(pow(2, i)) == DesiredGain) ValidGain = true;
@@ -120,7 +120,7 @@ int MCP3425::SetGain(int DesiredGain) {
 //Sets the resultion of the converter, either 12 bit, 14 bit, 16 bit, or 18 bit
 //Takes as input the desired resolution in number of bits 
 //Returns the result of the I2C comunication if the resolution is valid, or returns -1 if resolution value is not valid 
-int MCP3425::SetResolution(int DesiredResolution) {
+int MCP3421::SetResolution(int DesiredResolution) {
   boolean ValidResolution = false;
   for(int i = 0; i < 4; i++){ //Test if resolution value is valid
     if(12 + 2*i == DesiredResolution) ValidResolution = true;
@@ -138,7 +138,7 @@ int MCP3425::SetResolution(int DesiredResolution) {
 }
 
 //Returns the configuration register of the device, used for testing status of conversion, mode of operation, gain and resolution settings
-int MCP3425::GetConfig() {
+int MCP3421::GetConfig() {
   int Data[4];
     
   Wire.requestFrom(ADR, 4);
@@ -157,7 +157,7 @@ int MCP3425::GetConfig() {
 //Sets the mode of operation, either continuious or single shot operation
 //Takes as input the desired mode, either CONTINUIOUS or SINGLE_SHOT
 //Returns either the result of the attempt if input is valid, or -1 if input is not valid (neither CONTINUIOUS or SINGLE_SHOT)
-int MCP3425::SetMode(int Mode) {
+int MCP3421::SetMode(int Mode) {
   int Config  = GetConfig();  //Get current configuration register 
   if(Mode % 2 == 0) { //Value is either 0 or 1 and therefore valid, proceed 
     Config = (Config & 0xEF) | (Mode << 4); //Generate bit masked configuration register in order to set/clear mode bit
