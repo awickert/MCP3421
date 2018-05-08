@@ -1,11 +1,11 @@
-#include <MCP3425.h>
+#include <MCP3421.h>
 
-MCP3425 adc; //Initialize MCP3425 with default address, 0x6A
+MCP3421 adc; //Initialize MCP3421 with default address, 0x6A
 
 void setup() {
   Serial.begin(9600); //Begin serial comunication
   adc.Begin(); //Initialize ADC
-  Serial.print("Welcome to the Machine...\nBegin MCP3425 Demonstration\n\n"); //Token greating to verify Serial
+  Serial.print("Welcome to the Machine...\nBegin MCP3421 Demonstration\n\n"); //Token greating to verify Serial
 }
 
 void loop() {
