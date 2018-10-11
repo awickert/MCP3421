@@ -29,12 +29,19 @@ MCP3421::MCP3421(void)
   Wire.begin();  
 }
 
+int MCP3421::Begin(int _ADR) //Initialize the system in 1x gain, with 12 bit resolution, continuious conversions
+{
+  ADR = _ADR; //Allow for ADR to be set in begin statment as well
+  return Begin();
+}
 
 int MCP3421::Begin(void) //Initialize the system in 1x gain, with 12 bit resolution, continuious conversions
 {
   SetGain(1);
   SetResolution(12);
   SetMode(CONTINUIOUS);
+  Wire.beginTransmission(ADR);
+  return Wire.endTransmission(); //Return I2C status 
 }
 
 //Returns the bit value from the conversion, from 0 to 2^n

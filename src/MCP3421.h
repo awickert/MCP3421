@@ -27,6 +27,8 @@ class MCP3421
     MCP3421(int _ADR);
     MCP3421(void);
 
+    int Begin(int _ADR);
+    
     int Begin(void);
 
     long GetVoltageRaw();
