@@ -20,13 +20,21 @@ Distributed as-is; no warranty is given.
 MCP3421::MCP3421(int _ADR)
 {
   ADR = _ADR; 
-  Wire.begin();  
+  #if defined(ARDUINO) && ARDUINO >= 100 
+    Wire.begin();
+  #elif defined(PARTICLE)
+    if(!Wire.isEnabled()) Wire.begin(); //Only initialize I2C if not done already //INCLUDE FOR USE WITH PARTICLE 
+  #endif
 }
 
 MCP3421::MCP3421(void)  
 {
   ADR = 0x6A; //Use 0x6A as Address by default  
-  Wire.begin();  
+  #if defined(ARDUINO) && ARDUINO >= 100 
+    Wire.begin();
+  #elif defined(PARTICLE)
+    if(!Wire.isEnabled()) Wire.begin(); //Only initialize I2C if not done already //INCLUDE FOR USE WITH PARTICLE 
+  #endif
 }
 
 int MCP3421::Begin(int _ADR) //Initialize the system in 1x gain, with 12 bit resolution, continuious conversions
