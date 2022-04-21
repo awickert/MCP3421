@@ -46,7 +46,7 @@ int MCP3421::Begin(int _ADR) //Initialize the system in 1x gain, with 12 bit res
 int MCP3421::Begin(void) //Initialize the system in 1x gain, with 12 bit resolution, continuious conversions
 {
   SetGain(1);
-  SetResolution(12);
+  SetResolution(12); // measurement duration defaults to that required for 12 bit
   SetMode(CONTINUIOUS);
   Wire.beginTransmission(ADR);
   return Wire.endTransmission(); //Return I2C status 
@@ -70,6 +70,8 @@ long MCP3421::GetVoltageRaw(bool WaitForVal) {
       Config = GetConfig(); //Test register for new value to be read 
     }
 
+  delay(measurement_duration_ms); // Wait the requisite amount of time to take a measurement
+
   Wire.requestFrom(ADR, 4);
   
   if(Wire.available() == 4) //Get data bytes, 3 bytes of potential data and configuration register 
@@ -83,10 +85,26 @@ long MCP3421::GetVoltageRaw(bool WaitForVal) {
   int NumBits = 12 + ((Data[3] & 0x0C) >> 2)*2; //Calulate the number of bits used for conversion from config register
 
   unsigned long RawADC = 0; //Use appropriate conversion math based on the number of bits used in the conversion
-  if(NumBits == 12) RawADC = ((Data[0] & 0x0F) << 8) + Data[1];
-  if(NumBits == 14) RawADC = ((Data[0] & 0x3F) << 8) + Data[1];
-  if(NumBits == 16) RawADC = ((Data[0] & 0xFF) << 8) + Data[1];
-  if(NumBits == 18) RawADC = ((long(Data[0]) & 0x03) << 16) + (long(Data[1]) << 8) + Data[2];
+  if(NumBits == 12){
+    RawADC = ((Data[0] & 0x0F) << 8) + Data[1];
+    measurement_duration_ms = 5;
+  }
+  if(NumBits == 14){
+    RawADC = ((Data[0] & 0x3F) << 8) + Data[1];
+    measurement_duration_ms = 17;
+  }
+  if(NumBits == 16){
+    RawADC = ((Data[0] & 0xFF) << 8) + Data[1];
+    measurement_duration_ms = 67;
+  }
+  if(NumBits == 18){
+    RawADC = ((long(Data[0]) & 0x03) << 16) + (long(Data[1]) << 8) + Data[2];
+    measurement_duration_ms = 267;
+  }
+  if(RawADC > pow(2, NumBits)/2 - 1) //REMOVE??
+  {
+    RawADC -= pow(2, NumBits) - 1;
+  }
   
   if(RawADC > pow(2, NumBits)/2 - 1) //REMOVE??
   {
